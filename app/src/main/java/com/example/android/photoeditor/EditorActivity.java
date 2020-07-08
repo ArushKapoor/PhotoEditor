@@ -1,12 +1,18 @@
 package com.example.android.photoeditor;
 
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +23,20 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class EditorActivity extends AppCompatActivity {
+
+    private Bitmap bitmap;
+
+    private OutputStream outputStream;
 
     private ImageView imageView;
 
@@ -65,8 +81,16 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing
-                finish();
+                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+                Bitmap bitmap = drawable.getBitmap();
+                Log.v("Image", "Bitmap " + bitmap);
+                Save savefile = new Save();
+                try {
+                    savefile.saveImage(this, bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
