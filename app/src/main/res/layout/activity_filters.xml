@@ -17,18 +17,26 @@
         android:layout_height="wrap_content" >
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Resize"
-            android:onClick="resize" />
+            android:text="None"
+            android:onClick="defaultImage" />
 
         <Button
-            android:layout_width="wrap_content"
+            android:id="@+id/filter_1"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Filters"
-            android:onClick="filter" />
+            android:text="Filter 1"
+            android:onClick="filter1" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Filter 2"
+            android:onClick="filter2" />
 
     </LinearLayout>
 

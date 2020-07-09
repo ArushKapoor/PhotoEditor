@@ -1,17 +1,25 @@
 package com.example.android.photoeditor;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,6 +68,7 @@ public class Save {
     private void saveBitmap(@NonNull final Context context, @NonNull final Bitmap bitmap,
                             @NonNull final Bitmap.CompressFormat format, @NonNull final String mimeType,
                             @NonNull final String displayName) throws IOException {
+        Log.v("Image", "Inside saveBitmap folder");
         final String relativeLocation = Environment.DIRECTORY_DCIM + File.separator + "PhotoEditor";
 
         final ContentValues contentValues = new ContentValues();
@@ -92,6 +101,7 @@ public class Save {
                 UnableToSave();
                 throw new IOException("Failed to save bitmap.");
             }
+            Log.v("Image", "Able to save");
             AbleToSave();
         } catch (IOException e) {
             if (uri != null) {

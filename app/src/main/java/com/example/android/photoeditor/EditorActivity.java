@@ -1,17 +1,16 @@
 package com.example.android.photoeditor;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,42 +18,43 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NavUtils;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.security.Permission;
 
 public class EditorActivity extends AppCompatActivity {
 
-    private Bitmap bitmap;
+    private int REQUEST_CODE = 123;
 
-    private OutputStream outputStream;
+    public static final int PICK_IMAGE = 1;
 
     private ImageView imageView;
 
     private Bitmap selected_img;
 
+    private Uri uri;
+
+    Save savefile;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         /** Getting the Uri of the image passed from the previous intent */
         Intent intent = getIntent();
-        Uri uri = intent.getData();
+        uri = intent.getData();
 
         imageView = findViewById(R.id.image);
-        InputStream in;
 
+        InputStream in;
         /** Setting up the image on the layout */
         try {
             in = getContentResolver().openInputStream(uri);
@@ -67,9 +67,15 @@ public class EditorActivity extends AppCompatActivity {
         }
     }
 
+    public void filter(View view) {
+        Intent intent = new Intent(EditorActivity.this, FiltersActivity.class);
+        intent.setData(uri);
+        startActivityForResult(intent, PICK_IMAGE);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu options from the res/menu/menu_editor.xml file.
+        // Inflate the menu options from the res/menu/menu_filters.xml file.
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
         return true;
@@ -81,106 +87,87 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
-                Bitmap bitmap = drawable.getBitmap();
-                Log.v("Image", "Bitmap " + bitmap);
-                Save savefile = new Save();
-                try {
-                    savefile.saveImage(this, bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                Log.v("Image", "Bitmap " + selected_img);
+                savefile = new Save();
+                // Checking if permission is not granted
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat
+                            .requestPermissions(
+                                    this,
+                                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                                    REQUEST_CODE);
                 }
-//                finish();
+                else {
+                    try {
+                        savefile.saveImage(this, selected_img);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void defaultImage (View view) {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+//        /** Check if an image is selected */
+//        if (requestCode == Activity.RESULT_OK) {
+//            /** Creating the Uri of the image */
+        byte[] byteArray = data.getByteArrayExtra("image");
+        selected_img = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+
         imageView.setImageBitmap(selected_img);
+//        } else {
+//        Toast.makeText(this, "You didn't pick an image!",
+//        Toast.LENGTH_LONG).show();
+//        }
     }
 
-    public void filter1 (View view) {
-        imageView.setImageBitmap(doInvert(selected_img));
-    }
+//    private void requestPermission() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            requestPermissions(new String[]{
+//                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
+//        } else {
+//            openFilePicker();
+//        }
+//    }
 
-    public void filter2 (View view) {
-        imageView.setImageBitmap(createContrast(selected_img, 50));
-    }
+    // This function is called when user accept or decline the permission.
+// Request Code is used to check which permission called this function.
+// This request code is provided when user is prompt for permission.
 
-    public Bitmap doInvert(Bitmap src) {
-        // create new bitmap with the same settings as source bitmap
-        Bitmap bmOut = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
-        // color info
-        int A, R, G, B;
-        int pixelColor;
-        // image size
-        int height = src.getHeight();
-        int width = src.getWidth();
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        super
+                .onRequestPermissionsResult(requestCode,
+                        permissions,
+                        grantResults);
 
-        // scan through every pixel
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                // get one pixel
-                pixelColor = src.getPixel(x, y);
-                // saving alpha channel
-                A = Color.alpha(pixelColor);
-                // inverting byte for each R/G/B channel
-                R = 255 - Color.red(pixelColor);
-                G = 255 - Color.green(pixelColor);
-                B = 255 - Color.blue(pixelColor);
-                // set newly-inverted pixel to output image
-                bmOut.setPixel(x, y, Color.argb(A, R, G, B));
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    savefile.saveImage(this, selected_img);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                Toast.makeText(this,
+                        "Storage Permission Denied",
+                        Toast.LENGTH_SHORT)
+                        .show();
             }
         }
-
-        // return final bitmap
-        return bmOut;
     }
-
-    public Bitmap createContrast(Bitmap src, double value) {
-        // image size
-        int width = src.getWidth();
-        int height = src.getHeight();
-        // create output bitmap
-        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
-        // color information
-        int A, R, G, B;
-        int pixel;
-        // get contrast value
-        double contrast = Math.pow((100 + value) / 100, 2);
-
-        // scan through all pixels
-        for(int x = 0; x < width; ++x) {
-            for(int y = 0; y < height; ++y) {
-                // get pixel color
-                pixel = src.getPixel(x, y);
-                A = Color.alpha(pixel);
-                // apply filter contrast for every channel R, G, B
-                R = Color.red(pixel);
-                R = (int)(((((R / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(R < 0) { R = 0; }
-                else if(R > 255) { R = 255; }
-
-                G = Color.red(pixel);
-                G = (int)(((((G / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(G < 0) { G = 0; }
-                else if(G > 255) { G = 255; }
-
-                B = Color.red(pixel);
-                B = (int)(((((B / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(B < 0) { B = 0; }
-                else if(B > 255) { B = 255; }
-
-                // set new pixel color to output bitmap
-                bmOut.setPixel(x, y, Color.argb(A, R, G, B));
-            }
-        }
-
-        // return final image
-        return bmOut;
-    }
-
 }
