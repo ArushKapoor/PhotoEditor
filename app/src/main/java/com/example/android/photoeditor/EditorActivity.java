@@ -5,16 +5,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -24,6 +29,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +47,8 @@ public class EditorActivity extends AppCompatActivity {
     private Bitmap selected_img;
 
     private Uri uri;
+
+    private Uri picUri;
 
     Save savefile;
 
@@ -65,10 +74,44 @@ public class EditorActivity extends AppCompatActivity {
             Toast.makeText(this, "An error occured!",
                     Toast.LENGTH_LONG).show();
         }
+
+        Button resizeButtonView = findViewById(R.id.resize);
+        resizeButtonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resize();
+            }
+        });
+
+        Button filtersButtonView = findViewById(R.id.filters);
+        filtersButtonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filter();
+            }
+        });
     }
 
-    public void filter(View view) {
+    public void resize() {
+        Intent intent = new Intent(EditorActivity.this, ResizeActivity.class);
+//        Log.v("Images", "Inside resize method before  " + uri);
+//        getUri();
+//        if(picUri != null) {
+//            uri = picUri;
+//        }
+//        Log.v("Images", "Inside resize method after  " + uri);
+        intent.setData(uri);
+        startActivityForResult(intent, PICK_IMAGE);
+    }
+
+    public void filter() {
         Intent intent = new Intent(EditorActivity.this, FiltersActivity.class);
+//        Log.v("Images", "Inside filter method before  " + uri);
+//        getUri();
+//        if(picUri != null) {
+//            uri = picUri;
+//        }
+//        Log.v("Images", "Inside filter method after  " + uri);
         intent.setData(uri);
         startActivityForResult(intent, PICK_IMAGE);
     }
@@ -117,31 +160,26 @@ public class EditorActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-//        /** Check if an image is selected */
-//        if (requestCode == Activity.RESULT_OK) {
-//            /** Creating the Uri of the image */
         byte[] byteArray = data.getByteArrayExtra("image");
         selected_img = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
         imageView.setImageBitmap(selected_img);
-//        } else {
-//        Toast.makeText(this, "You didn't pick an image!",
-//        Toast.LENGTH_LONG).show();
+
+//        String imgPath = getRealPathFromURI(uri);
+//        File fdelete = new File(imgPath);
+//
+//        if (fdelete.exists()) {
+//            if (fdelete.delete()) {
+//            } else {
+//            }
 //        }
+//        callBroadCast();
     }
 
-//    private void requestPermission() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            requestPermissions(new String[]{
-//                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
-//        } else {
-//            openFilePicker();
-//        }
-//    }
 
     // This function is called when user accept or decline the permission.
-// Request Code is used to check which permission called this function.
-// This request code is provided when user is prompt for permission.
+    // Request Code is used to check which permission called this function.
+    // This request code is provided when user is prompt for permission.
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -170,4 +208,46 @@ public class EditorActivity extends AppCompatActivity {
             }
         }
     }
+
+//    private void getUri() {
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        selected_img.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+//        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), selected_img, "Title", null);
+//        picUri = Uri.parse(path);
+//    }
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
+//    public void callBroadCast() {
+//        if (Build.VERSION.SDK_INT >= 14) {
+//            Log.e("-->", " >= 14");
+//            MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
+//                /*
+//                 *   (non-Javadoc)
+//                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
+//                 */
+//                public void onScanCompleted(String path, Uri uri) {
+////                    Log.e("ExternalStorage", "Scanned " + path + ":");
+////                    Log.e("ExternalStorage", "-> uri=" + uri);
+//                }
+//            });
+//        } else {
+////            Log.e("-->", " < 14");
+//            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
+//                    Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+//        }
+//    }
+
 }

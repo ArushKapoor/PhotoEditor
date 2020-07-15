@@ -24,6 +24,17 @@
             android:label="Editor"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name=".ResizeActivity"
+            android:label="Resize"
+            android:parentActivityName="com.example.android.photoeditor.EditorActivity" >
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.android.photoeditor.EditorActivity" />
+
+        </activity>
+        <activity
             android:name=".FiltersActivity"
             android:label="Filters"
             android:parentActivityName="com.example.android.photoeditor.EditorActivity" >

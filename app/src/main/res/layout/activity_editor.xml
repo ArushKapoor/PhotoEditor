@@ -17,18 +17,18 @@
         android:layout_height="wrap_content" >
 
         <Button
+            android:id="@+id/resize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Resize"
-            android:onClick="resize" />
+            android:text="Resize" />
 
         <Button
+            android:id="@+id/filters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Filters"
-            android:onClick="filter" />
+            android:text="Filters" />
 
     </LinearLayout>
 

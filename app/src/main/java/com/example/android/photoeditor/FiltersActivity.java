@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -41,6 +42,36 @@ public class FiltersActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filters);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        Button buttonView = findViewById(R.id.button_1);
+        buttonView.setText("None");
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                current_img = selected_img;
+                imageView.setImageBitmap(current_img);
+            }
+        });
+
+        buttonView = findViewById(R.id.button_2);
+        buttonView.setText("Filter 1");
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                current_img = doInvert(selected_img);
+                imageView.setImageBitmap(current_img);
+            }
+        });
+
+        buttonView = findViewById(R.id.button_3);
+        buttonView.setText("Filter 2");
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                current_img = createContrast(selected_img, 50);
+                imageView.setImageBitmap(current_img);
+            }
+        });
+
         /** Getting the Uri of the image passed from the previous intent */
         Intent intent = getIntent();
         uri = intent.getData();
@@ -65,7 +96,7 @@ public class FiltersActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_filters.xml file.
         // This adds menu items to the app bar.
-        getMenuInflater().inflate(R.menu.menu_filters, menu);
+        getMenuInflater().inflate(R.menu.menu_editor, menu);
         return true;
     }
 
@@ -93,21 +124,6 @@ public class FiltersActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void defaultImage (View view) {
-        current_img = selected_img;
-        imageView.setImageBitmap(current_img);
-    }
-
-    public void filter1 (View view) {
-        current_img = doInvert(selected_img);
-        imageView.setImageBitmap(current_img);
-    }
-
-    public void filter2 (View view) {
-        current_img = createContrast(selected_img, 50);
-        imageView.setImageBitmap(current_img);
     }
 
     public Bitmap doInvert(Bitmap src) {
