@@ -2,6 +2,7 @@ package com.example.android.photoeditor;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -27,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,11 +41,15 @@ public class ResizeActivity extends AppCompatActivity {
 
     private Bitmap current_img;
 
+    private Bitmap selected_img;
+
     private Uri uri;
 
     private Uri picUri;
 
     final int PIC_CROP = 1;
+
+    int x = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,16 +91,27 @@ public class ResizeActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.image);
 
-        InputStream in;
-        /** Setting up the image on the layout */
+//        InputStream in;
+//        /** Setting up the image on the layout */
+//        try {
+//            in = getContentResolver().openInputStream(uri);
+//            current_img = BitmapFactory.decodeStream(in);
+//            imageView.setImageBitmap(current_img);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            Toast.makeText(this, "An error occured!",
+//                    Toast.LENGTH_LONG).show();
+//        }
+
+        String filename = getIntent().getStringExtra("image");
         try {
-            in = getContentResolver().openInputStream(uri);
-            current_img = BitmapFactory.decodeStream(in);
+            FileInputStream is = this.openFileInput(filename);
+            selected_img = BitmapFactory.decodeStream(is);
+            current_img = selected_img;
             imageView.setImageBitmap(current_img);
-        } catch (FileNotFoundException e) {
+            is.close();
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "An error occured!",
-                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -123,11 +140,32 @@ public class ResizeActivity extends AppCompatActivity {
                 finish();
                 return true;
             case android.R.id.home:
-                Intent intent = new Intent(ResizeActivity.this, EditorActivity.class);
-                intent.setData(uri);
-                startActivity(intent);
-//                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
+
+                try {
+                    //Write file
+                    String filename = "bitmap.png";
+                    FileOutputStream stream1 = this.openFileOutput(filename, Context.MODE_PRIVATE);
+                    selected_img.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+
+                    //Cleanup
+                    stream1.close();
+                    selected_img.recycle();
+
+                    //Pop intent
+                    Intent intent = new Intent(ResizeActivity.this, EditorActivity.class);
+                    intent.setData(null);
+                    intent.putExtra("image", filename);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
+
+//                Intent intent = new Intent(ResizeActivity.this, EditorActivity.class);
+//                intent.setData(uri);
+//                startActivity(intent);
+////                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
+//                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -146,7 +184,8 @@ public class ResizeActivity extends AppCompatActivity {
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             current_img.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-            String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), current_img, "Title", null);
+            String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), current_img, "Title" + x, null);
+            x++;
             picUri = Uri.parse(path);
 
             Intent cropIntent = new Intent("com.android.camera.action.CROP");
@@ -186,12 +225,12 @@ public class ResizeActivity extends AppCompatActivity {
                 current_img = extras.getParcelable("data");
                 imageView.setImageBitmap(current_img);
                 String imgPath = getRealPathFromURI(picUri);
+                callBroadCast();
                 File fdelete = new File(imgPath);
                 Log.v("Images", "Inside onActivityResult  " + fdelete.exists());
 
                 if (fdelete.exists()) {
                     if (fdelete.delete()) {
-                        callBroadCast();
                         Log.v("Images", "Inside true fdelete");
                         Log.v("Images", "File deleted");
                     } else {

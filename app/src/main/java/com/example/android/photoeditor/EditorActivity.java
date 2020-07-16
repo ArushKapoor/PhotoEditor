@@ -31,7 +31,9 @@ import androidx.core.content.ContextCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Permission;
@@ -63,16 +65,28 @@ public class EditorActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.image);
 
-        InputStream in;
-        /** Setting up the image on the layout */
-        try {
-            in = getContentResolver().openInputStream(uri);
-            selected_img = BitmapFactory.decodeStream(in);
-            imageView.setImageBitmap(selected_img);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "An error occured!",
-                    Toast.LENGTH_LONG).show();
+        if(uri != null) {
+            InputStream in;
+            /** Setting up the image on the layout */
+            try {
+                in = getContentResolver().openInputStream(uri);
+                selected_img = BitmapFactory.decodeStream(in);
+                imageView.setImageBitmap(selected_img);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "An error occured!",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            String filename = getIntent().getStringExtra("image");
+            try {
+                FileInputStream is = this.openFileInput(filename);
+                selected_img = BitmapFactory.decodeStream(is);
+                imageView.setImageBitmap(selected_img);
+                is.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         Button resizeButtonView = findViewById(R.id.resize);
@@ -93,27 +107,66 @@ public class EditorActivity extends AppCompatActivity {
     }
 
     public void resize() {
-        Intent intent = new Intent(EditorActivity.this, ResizeActivity.class);
+
+        try {
+            //Write file
+            String filename = "bitmap.jpg";
+            FileOutputStream stream = this.openFileOutput(filename, Context.MODE_PRIVATE);
+            selected_img.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+            //Cleanup
+            stream.close();
+            selected_img.recycle();
+
+            //Pop intent
+            Intent intent = new Intent(EditorActivity.this, ResizeActivity.class);
+            intent.putExtra("image", filename);
+            intent.setData(uri);
+            startActivityForResult(intent, PICK_IMAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 //        Log.v("Images", "Inside resize method before  " + uri);
 //        getUri();
 //        if(picUri != null) {
 //            uri = picUri;
 //        }
 //        Log.v("Images", "Inside resize method after  " + uri);
-        intent.setData(uri);
-        startActivityForResult(intent, PICK_IMAGE);
+//        intent.setData(uri);
+//        startActivityForResult(intent, PICK_IMAGE);
     }
 
     public void filter() {
-        Intent intent = new Intent(EditorActivity.this, FiltersActivity.class);
+
+        try {
+            //Write file
+            String filename = "bitmap.jpg";
+            FileOutputStream stream = this.openFileOutput(filename, Context.MODE_PRIVATE);
+            selected_img.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+
+            //Cleanup
+            stream.close();
+            selected_img.recycle();
+
+            //Pop intent
+            Intent intent = new Intent(EditorActivity.this, FiltersActivity.class);
+            intent.putExtra("image", filename);
+            intent.setData(uri);
+            startActivityForResult(intent, PICK_IMAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 //        Log.v("Images", "Inside filter method before  " + uri);
 //        getUri();
 //        if(picUri != null) {
 //            uri = picUri;
 //        }
 //        Log.v("Images", "Inside filter method after  " + uri);
-        intent.setData(uri);
-        startActivityForResult(intent, PICK_IMAGE);
+//        intent.setData(uri);
+//        startActivityForResult(intent, PICK_IMAGE);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.example.android.photoeditor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,7 +19,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -77,18 +80,28 @@ public class FiltersActivity extends AppCompatActivity {
         uri = intent.getData();
 
         imageView = findViewById(R.id.image);
-        InputStream in;
+//        InputStream in;
 
-        /** Setting up the image on the layout */
+//        /** Setting up the image on the layout */
+//        try {
+//            in = getContentResolver().openInputStream(uri);
+//            selected_img = BitmapFactory.decodeStream(in);
+//            current_img = selected_img;
+//            imageView.setImageBitmap(current_img);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            Toast.makeText(this, "An error occured!",
+//                    Toast.LENGTH_LONG).show();
+//        }
+        String filename = getIntent().getStringExtra("image");
         try {
-            in = getContentResolver().openInputStream(uri);
-            selected_img = BitmapFactory.decodeStream(in);
+            FileInputStream is = this.openFileInput(filename);
+            selected_img = BitmapFactory.decodeStream(is);
             current_img = selected_img;
             imageView.setImageBitmap(current_img);
-        } catch (FileNotFoundException e) {
+            is.close();
+        } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "An error occured!",
-                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -117,11 +130,32 @@ public class FiltersActivity extends AppCompatActivity {
                 finish();
                 return true;
             case android.R.id.home:
-                Intent intent = new Intent(FiltersActivity.this, EditorActivity.class);
-                intent.setData(uri);
-                startActivity(intent);
-//                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
+
+                try {
+                    //Write file
+                    String filename = "bitmap.png";
+                    FileOutputStream stream1 = this.openFileOutput(filename, Context.MODE_PRIVATE);
+                    selected_img.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+
+                    //Cleanup
+                    stream1.close();
+                    selected_img.recycle();
+
+                    //Pop intent
+                    Intent intent = new Intent(FiltersActivity.this, EditorActivity.class);
+                    intent.setData(null);
+                    intent.putExtra("image", filename);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
+
+//                Intent intent = new Intent(FiltersActivity.this, EditorActivity.class);
+//                intent.setData(uri);
+//                startActivity(intent);
+////                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
+//                return true;
         }
         return super.onOptionsItemSelected(item);
     }
