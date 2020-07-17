@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             } else {
-                Toast.makeText(this, "You can only choose 2 images", Toast.LENGTH_SHORT);
+                Toast.makeText(this, "You can only choose 4 images for a collage", Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
