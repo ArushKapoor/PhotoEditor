@@ -27,7 +27,23 @@ public class FiltersActivity extends AppCompatActivity {
 
     private Bitmap selected_img;
 
+    private Bitmap inverted_img;
+
+    private Bitmap contrasted_img;
+
+    private Bitmap sepia_img;
+
+    private Bitmap saturated_img;
+
     private Bitmap current_img;
+
+    private boolean isInverted = false;
+
+    private boolean isContrasted = false;
+
+    private boolean isSepia = false;
+
+    private boolean isSaturated = false;
 
     private Uri uri;
 
@@ -38,7 +54,6 @@ public class FiltersActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Button buttonView = findViewById(R.id.button_1);
-        buttonView.setText("None");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,21 +63,53 @@ public class FiltersActivity extends AppCompatActivity {
         });
 
         buttonView = findViewById(R.id.button_2);
-        buttonView.setText("Filter 1");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                current_img = doInvert(selected_img);
+                if(!isInverted) {
+                    inverted_img = doInvert(selected_img);
+                    isInverted = true;
+                }
+                current_img = inverted_img;
                 imageView.setImageBitmap(current_img);
             }
         });
 
         buttonView = findViewById(R.id.button_3);
-        buttonView.setText("Filter 2");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                current_img = createContrast(selected_img, 50);
+                if(!isContrasted) {
+                    contrasted_img = createContrast(selected_img, 50);
+                    isContrasted = true;
+                }
+                current_img = contrasted_img;
+                imageView.setImageBitmap(current_img);
+            }
+        });
+
+        buttonView = findViewById(R.id.button_4);
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isSepia) {
+                    sepia_img = createSepiaToningEffect(selected_img, 100, 0.7, 0.3, 0.12);
+                    isSepia = true;
+                }
+                current_img = sepia_img;
+                imageView.setImageBitmap(current_img);
+            }
+        });
+
+        buttonView = findViewById(R.id.button_5);
+        buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isSaturated) {
+                    saturated_img = applySaturationFilter(selected_img, 2);
+                    isSaturated = true;
+                }
+                current_img = saturated_img;
                 imageView.setImageBitmap(current_img);
             }
         });
@@ -213,6 +260,82 @@ public class FiltersActivity extends AppCompatActivity {
         }
 
         // return final image
+        return bmOut;
+    }
+
+    public Bitmap createSepiaToningEffect(Bitmap src, int depth, double red, double green, double blue) {
+        // image size
+        int width = src.getWidth();
+        int height = src.getHeight();
+        // create output bitmap
+        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
+        // constant grayscale
+        final double GS_RED = 0.3;
+        final double GS_GREEN = 0.59;
+        final double GS_BLUE = 0.11;
+        // color information
+        int A, R, G, B;
+        int pixel;
+
+        // scan through all pixels
+        for(int x = 0; x < width; ++x) {
+            for(int y = 0; y < height; ++y) {
+                // get pixel color
+                pixel = src.getPixel(x, y);
+                // get color on each channel
+                A = Color.alpha(pixel);
+                R = Color.red(pixel);
+                G = Color.green(pixel);
+                B = Color.blue(pixel);
+                // apply grayscale sample
+                B = G = R = (int)(GS_RED * R + GS_GREEN * G + GS_BLUE * B);
+
+                // apply intensity level for sepid-toning on each channel
+                R += (depth * red);
+                if(R > 255) { R = 255; }
+
+                G += (depth * green);
+                if(G > 255) { G = 255; }
+
+                B += (depth * blue);
+                if(B > 255) { B = 255; }
+
+                // set new pixel color to output image
+                bmOut.setPixel(x, y, Color.argb(A, R, G, B));
+            }
+        }
+
+        // return final image
+        return bmOut;
+    }
+
+    public Bitmap applySaturationFilter(Bitmap source, int level) {
+        // get image size
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int[] pixels = new int[width * height];
+        float[] HSV = new float[3];
+        // get pixel array from source
+        source.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        int index = 0;
+        // iteration through pixels
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                // get current index in 2D-matrix
+                index = y * width + x;
+                // convert to HSV
+                Color.colorToHSV(pixels[index], HSV);
+                // increase Saturation level
+                HSV[1] *= level;
+                HSV[1] = (float) Math.max(0.0, Math.min(HSV[1], 1.0));
+                // take color back
+                pixels[index] = Color.HSVToColor(HSV);
+            }
+        }
+        // output bitmap
+        Bitmap bmOut = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bmOut.setPixels(pixels, 0, width, 0, 0, width, height);
         return bmOut;
     }
 

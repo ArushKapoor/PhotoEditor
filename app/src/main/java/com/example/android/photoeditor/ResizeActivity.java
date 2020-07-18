@@ -49,10 +49,9 @@ public class ResizeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_filters);
+        setContentView(R.layout.activity_resize);
 
         Button buttonView = findViewById(R.id.button_1);
-        buttonView.setText("Crop");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +60,6 @@ public class ResizeActivity extends AppCompatActivity {
         });
 
         buttonView = findViewById(R.id.button_2);
-        buttonView.setText("Rotate Left");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,7 +69,6 @@ public class ResizeActivity extends AppCompatActivity {
         });
 
         buttonView = findViewById(R.id.button_3);
-        buttonView.setText("Rotate Right");
         buttonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
