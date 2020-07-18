@@ -1,20 +1,13 @@
 package com.example.android.photoeditor;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,14 +22,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Permission;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -65,7 +55,7 @@ public class EditorActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.image);
 
-        if(uri != null) {
+        if (uri != null) {
             InputStream in;
             /** Setting up the image on the layout */
             try {
@@ -126,15 +116,6 @@ public class EditorActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        Log.v("Images", "Inside resize method before  " + uri);
-//        getUri();
-//        if(picUri != null) {
-//            uri = picUri;
-//        }
-//        Log.v("Images", "Inside resize method after  " + uri);
-//        intent.setData(uri);
-//        startActivityForResult(intent, PICK_IMAGE);
     }
 
     public void filter() {
@@ -157,16 +138,6 @@ public class EditorActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-//        Log.v("Images", "Inside filter method before  " + uri);
-//        getUri();
-//        if(picUri != null) {
-//            uri = picUri;
-//        }
-//        Log.v("Images", "Inside filter method after  " + uri);
-//        intent.setData(uri);
-//        startActivityForResult(intent, PICK_IMAGE);
     }
 
     @Override
@@ -193,10 +164,9 @@ public class EditorActivity extends AppCompatActivity {
                     ActivityCompat
                             .requestPermissions(
                                     this,
-                                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                     REQUEST_CODE);
-                }
-                else {
+                } else {
                     try {
                         savefile.saveImage(this, selected_img);
                     } catch (IOException e) {
@@ -217,16 +187,6 @@ public class EditorActivity extends AppCompatActivity {
         selected_img = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
         imageView.setImageBitmap(selected_img);
-
-//        String imgPath = getRealPathFromURI(uri);
-//        File fdelete = new File(imgPath);
-//
-//        if (fdelete.exists()) {
-//            if (fdelete.delete()) {
-//            } else {
-//            }
-//        }
-//        callBroadCast();
     }
 
 
@@ -237,8 +197,7 @@ public class EditorActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
+                                           @NonNull int[] grantResults) {
         super
                 .onRequestPermissionsResult(requestCode,
                         permissions,
@@ -252,8 +211,7 @@ public class EditorActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(this,
                         "Storage Permission Denied",
                         Toast.LENGTH_SHORT)
@@ -261,46 +219,4 @@ public class EditorActivity extends AppCompatActivity {
             }
         }
     }
-
-//    private void getUri() {
-//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//        selected_img.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-//        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), selected_img, "Title", null);
-//        picUri = Uri.parse(path);
-//    }
-
-    private String getRealPathFromURI(Uri contentURI) {
-        String result;
-        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) { // Source is Dropbox or other similar local file path
-            result = contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
-        }
-        return result;
-    }
-
-//    public void callBroadCast() {
-//        if (Build.VERSION.SDK_INT >= 14) {
-//            Log.e("-->", " >= 14");
-//            MediaScannerConnection.scanFile(this, new String[]{Environment.getExternalStorageDirectory().toString()}, null, new MediaScannerConnection.OnScanCompletedListener() {
-//                /*
-//                 *   (non-Javadoc)
-//                 * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
-//                 */
-//                public void onScanCompleted(String path, Uri uri) {
-////                    Log.e("ExternalStorage", "Scanned " + path + ":");
-////                    Log.e("ExternalStorage", "-> uri=" + uri);
-//                }
-//            });
-//        } else {
-////            Log.e("-->", " < 14");
-//            sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
-//                    Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-//        }
-//    }
-
 }

@@ -13,23 +13,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class FiltersActivity extends AppCompatActivity {
-
-    private Bitmap bitmap;
-
-    private OutputStream outputStream;
 
     private ImageView imageView;
 
@@ -80,19 +72,7 @@ public class FiltersActivity extends AppCompatActivity {
         uri = intent.getData();
 
         imageView = findViewById(R.id.image);
-//        InputStream in;
 
-//        /** Setting up the image on the layout */
-//        try {
-//            in = getContentResolver().openInputStream(uri);
-//            selected_img = BitmapFactory.decodeStream(in);
-//            current_img = selected_img;
-//            imageView.setImageBitmap(current_img);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//            Toast.makeText(this, "An error occured!",
-//                    Toast.LENGTH_LONG).show();
-//        }
         String filename = getIntent().getStringExtra("image");
         try {
             FileInputStream is = this.openFileInput(filename);
@@ -124,7 +104,7 @@ public class FiltersActivity extends AppCompatActivity {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 current_img.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byte[] byteArray = stream.toByteArray();
-                resultIntent.putExtra("image",byteArray);
+                resultIntent.putExtra("image", byteArray);
 
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
@@ -150,12 +130,6 @@ public class FiltersActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 return true;
-
-//                Intent intent = new Intent(FiltersActivity.this, EditorActivity.class);
-//                intent.setData(uri);
-//                startActivity(intent);
-////                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
-//                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -171,10 +145,8 @@ public class FiltersActivity extends AppCompatActivity {
         int width = src.getWidth();
 
         // scan through every pixel
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 // get one pixel
                 pixelColor = src.getPixel(x, y);
                 // saving alpha channel
@@ -205,26 +177,35 @@ public class FiltersActivity extends AppCompatActivity {
         double contrast = Math.pow((100 + value) / 100, 2);
 
         // scan through all pixels
-        for(int x = 0; x < width; ++x) {
-            for(int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
                 // get pixel color
                 pixel = src.getPixel(x, y);
                 A = Color.alpha(pixel);
                 // apply filter contrast for every channel R, G, B
                 R = Color.red(pixel);
-                R = (int)(((((R / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(R < 0) { R = 0; }
-                else if(R > 255) { R = 255; }
+                R = (int) (((((R / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (R < 0) {
+                    R = 0;
+                } else if (R > 255) {
+                    R = 255;
+                }
 
                 G = Color.red(pixel);
-                G = (int)(((((G / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(G < 0) { G = 0; }
-                else if(G > 255) { G = 255; }
+                G = (int) (((((G / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (G < 0) {
+                    G = 0;
+                } else if (G > 255) {
+                    G = 255;
+                }
 
                 B = Color.red(pixel);
-                B = (int)(((((B / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
-                if(B < 0) { B = 0; }
-                else if(B > 255) { B = 255; }
+                B = (int) (((((B / 255.0) - 0.5) * contrast) + 0.5) * 255.0);
+                if (B < 0) {
+                    B = 0;
+                } else if (B > 255) {
+                    B = 255;
+                }
 
                 // set new pixel color to output bitmap
                 bmOut.setPixel(x, y, Color.argb(A, R, G, B));

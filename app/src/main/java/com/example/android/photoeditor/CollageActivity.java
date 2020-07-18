@@ -1,7 +1,6 @@
 package com.example.android.photoeditor;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,8 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -38,9 +35,7 @@ public class CollageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_collage);
 
         /** Getting the Bitmap of the images passed from the previous intent */
-        Intent intent = getIntent();
         Bitmap[] bitmaps = new Bitmap[4];
-        int width = 0, height = 0;
         for (int i = 0; i < bitmaps.length; i++) {
             String filename = getIntent().getStringExtra("image" + i);
             try {
@@ -48,24 +43,12 @@ public class CollageActivity extends AppCompatActivity {
                 bitmaps[i] = BitmapFactory.decodeStream(is);
                 collage = Bitmap.createScaledBitmap(bitmaps[i], bitmaps[0].getWidth(), bitmaps[0].getHeight(), false);
                 bitmaps[i] = collage;
-                width += bitmaps[i].getWidth();
-                height += bitmaps[i].getHeight();
-//                current_img = selected_img;
-//                imageView.setImageBitmap(current_img);
                 is.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         imageView = findViewById(R.id.collage);
-//        imageView.setImageBitmap(bitmaps[0]);
-
-        Log.v("Collage", "Testing to see if it works");
-
-//        final Bitmap horizontalMerge = horizontalMerge(bitmaps[0], bitmaps[1]);
-//        final Bitmap verticalMerge = verticalMerge(bitmaps[0], bitmaps[1]);
-
-//        imageView.setImageBitmap(horizontalMerge);
 
         collage = Bitmap.createBitmap(bitmaps[0].getWidth() + bitmaps[1].getWidth(), bitmaps[0].getHeight() + bitmaps[1].getHeight(), bitmaps[0].getConfig());
         Canvas canvas = new Canvas(collage);
@@ -101,10 +84,9 @@ public class CollageActivity extends AppCompatActivity {
                     ActivityCompat
                             .requestPermissions(
                                     this,
-                                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                     REQUEST_CODE);
-                }
-                else {
+                } else {
                     try {
                         savefile.saveImage(this, collage);
                     } catch (IOException e) {

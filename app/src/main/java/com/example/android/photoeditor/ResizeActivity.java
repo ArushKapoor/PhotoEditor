@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -29,11 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 
 public class ResizeActivity extends AppCompatActivity {
 
@@ -91,18 +86,6 @@ public class ResizeActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.image);
 
-//        InputStream in;
-//        /** Setting up the image on the layout */
-//        try {
-//            in = getContentResolver().openInputStream(uri);
-//            current_img = BitmapFactory.decodeStream(in);
-//            imageView.setImageBitmap(current_img);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//            Toast.makeText(this, "An error occured!",
-//                    Toast.LENGTH_LONG).show();
-//        }
-
         String filename = getIntent().getStringExtra("image");
         try {
             FileInputStream is = this.openFileInput(filename);
@@ -145,7 +128,7 @@ public class ResizeActivity extends AppCompatActivity {
                     //Write file
                     String filename = "bitmap.png";
                     FileOutputStream stream1 = this.openFileOutput(filename, Context.MODE_PRIVATE);
-                    selected_img.compress(Bitmap.CompressFormat.PNG, 100, stream1);
+                    selected_img.compress(Bitmap.CompressFormat.JPEG, 100, stream1);
 
                     //Cleanup
                     stream1.close();
@@ -160,12 +143,6 @@ public class ResizeActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 return true;
-
-//                Intent intent = new Intent(ResizeActivity.this, EditorActivity.class);
-//                intent.setData(uri);
-//                startActivity(intent);
-////                NavUtils.navigateUpFromSameTask(FiltersActivity.this);
-//                return true;
         }
         return super.onOptionsItemSelected(item);
     }

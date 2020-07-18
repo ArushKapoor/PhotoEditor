@@ -4,7 +4,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -74,18 +73,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createCollage() {
-//        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-//        getIntent.setType("image/*");
-//
-//        Intent pickIntent = new Intent(Intent.ACTION_PICK,
-//                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//        pickIntent.setType("image/*");
-//
-//        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-//        chooserIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
-//
-//        startActivityForResult(chooserIntent, PICK_IMAGES);
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
@@ -115,13 +102,10 @@ public class MainActivity extends AppCompatActivity {
         } else if (requestCode == PICK_IMAGES) {
             if (data.getClipData() != null) {
                 ClipData mClipData = data.getClipData();
-                if(mClipData.getItemCount() != 4) {
+                if (mClipData.getItemCount() != 4) {
                     Toast.makeText(this, "You can only choose 4 images for a collage", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-//                    Intent intent = new Intent(MainActivity.this, EditorActivity.class);
-//                    intent.setData(uri);
-//                    startActivity(intent);
                     InputStream in;
                     Uri uri;
                     Bitmap[] bitmaps = new Bitmap[mClipData.getItemCount()];
@@ -135,14 +119,13 @@ public class MainActivity extends AppCompatActivity {
                             in = getContentResolver().openInputStream(uri);
                             selected_img = BitmapFactory.decodeStream(in);
                             bitmaps[i] = selected_img;
-//                            imageView.setImageBitmap(selected_img);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                             Toast.makeText(this, "An error occured!",
                                     Toast.LENGTH_LONG).show();
                         }
                     }
-                    if(bitmaps.length != 0) {
+                    if (bitmaps.length != 0) {
                         startCollageIntent(bitmaps);
                     }
                 }
@@ -165,12 +148,9 @@ public class MainActivity extends AppCompatActivity {
                  * @see android.media.MediaScannerConnection.OnScanCompletedListener#onScanCompleted(java.lang.String, android.net.Uri)
                  */
                 public void onScanCompleted(String path, Uri uri) {
-//                    Log.e("ExternalStorage", "Scanned " + path + ":");
-//                    Log.e("ExternalStorage", "-> uri=" + uri);
                 }
             });
         } else {
-//            Log.e("-->", " < 14");
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
                     Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
@@ -178,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startCollageIntent(Bitmap[] bitmaps) {
         Intent intent = new Intent(MainActivity.this, CollageActivity.class);
-        for(int i = 0; i < bitmaps.length; i++) {
+        for (int i = 0; i < bitmaps.length; i++) {
             try {
                 //Write file
                 String filename = "bitmap" + i + ".jpg";
@@ -192,8 +172,6 @@ public class MainActivity extends AppCompatActivity {
 
                 //Pop intent
                 intent.putExtra("image" + i, filename);
-//                intent.setData(uri);
-//                startActivityForResult(intent, PICK_IMAGE);
             } catch (Exception e) {
                 e.printStackTrace();
             }
