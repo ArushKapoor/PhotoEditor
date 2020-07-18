@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -58,7 +60,8 @@ public class FiltersActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 current_img = selected_img;
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -71,7 +74,8 @@ public class FiltersActivity extends AppCompatActivity {
                     isInverted = true;
                 }
                 current_img = inverted_img;
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -84,7 +88,8 @@ public class FiltersActivity extends AppCompatActivity {
                     isContrasted = true;
                 }
                 current_img = contrasted_img;
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+//                imageView.setImageBitmap(current_img);
             }
         });
 
@@ -97,7 +102,8 @@ public class FiltersActivity extends AppCompatActivity {
                     isSepia = true;
                 }
                 current_img = sepia_img;
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -110,7 +116,8 @@ public class FiltersActivity extends AppCompatActivity {
                     isSaturated = true;
                 }
                 current_img = saturated_img;
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -337,6 +344,27 @@ public class FiltersActivity extends AppCompatActivity {
         Bitmap bmOut = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         bmOut.setPixels(pixels, 0, width, 0, 0, width, height);
         return bmOut;
+    }
+
+    public void imageViewAnimatedChange() {
+        final Animation anim_out = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        final Animation anim_in  = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+        anim_out.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationRepeat(Animation animation) {}
+            @Override public void onAnimationEnd(Animation animation)
+            {
+                imageView.setImageBitmap(current_img);
+                anim_in.setAnimationListener(new Animation.AnimationListener() {
+                    @Override public void onAnimationStart(Animation animation) {}
+                    @Override public void onAnimationRepeat(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {}
+                });
+                imageView.startAnimation(anim_in);
+            }
+        });
+        imageView.startAnimation(anim_out);
     }
 
 }

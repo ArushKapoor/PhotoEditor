@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -64,7 +66,8 @@ public class ResizeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 current_img = rotate(-90);
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -73,7 +76,8 @@ public class ResizeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 current_img = rotate(90);
-                imageView.setImageBitmap(current_img);
+                imageViewAnimatedChange();
+                //imageView.setImageBitmap(current_img);
             }
         });
 
@@ -248,5 +252,26 @@ public class ResizeActivity extends AppCompatActivity {
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,
                     Uri.parse("file://" + Environment.getExternalStorageDirectory())));
         }
+    }
+
+    public void imageViewAnimatedChange() {
+        final Animation anim_out = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        final Animation anim_in  = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+        anim_out.setAnimationListener(new Animation.AnimationListener()
+        {
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationRepeat(Animation animation) {}
+            @Override public void onAnimationEnd(Animation animation)
+            {
+                imageView.setImageBitmap(current_img);
+                anim_in.setAnimationListener(new Animation.AnimationListener() {
+                    @Override public void onAnimationStart(Animation animation) {}
+                    @Override public void onAnimationRepeat(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {}
+                });
+                imageView.startAnimation(anim_in);
+            }
+        });
+        imageView.startAnimation(anim_out);
     }
 }
